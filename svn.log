@@ -1,0 +1,103 @@
+------------------------------------------------------------------------
+r14 | fbudin | 2015-07-08 09:49:16 -0400 (Wed, 08 Jul 2015) | 3 lines
+
+BUG: Icon and screenshot URL for 3D Slicer extension were wrong in the CMakeLists.txt file.
+
+
+------------------------------------------------------------------------
+r13 | fbudin | 2014-10-10 10:42:47 -0400 (Fri, 10 Oct 2014) | 4 lines
+
+BUG: include(ExternalData) was missing.
+
+Project was not configuring with CMake 2.8*, but only with CMake 3. Inclusion of CTest and ExternalData has been moved to main CMakeLists (not superbuild) to be able to run the tests from the main folder.
+
+------------------------------------------------------------------------
+r12 | fbudin | 2014-08-20 15:39:06 -0400 (Wed, 20 Aug 2014) | 6 lines
+
+ENH: Changed IntensitySegmenter CLI category in Slicer
+ENH: The input image is loaded as a float image. This allows to use float ranges.
+ENH: Addition of a default voxel value in case the range does not cover this value
+ENH: Addition of tests to cover more options
+
+
+------------------------------------------------------------------------
+r11 | fbudin | 2014-08-19 09:44:41 -0400 (Tue, 19 Aug 2014) | 5 lines
+
+ENH: Allow to configure with CMake 2.8.10
+
+In previous revision, IntensitySegmenter could only be configured with CMake 2.8.12 and above. This was because "ExternalData" and "ExternalData_Add_Test" only exist starting in CMake 2.8.11 and CMake 2.8.12 is already widely used. However, CMake 2.8.10 is still used to compile Slicer extensions for Windows and Linux.
+ 
+
+------------------------------------------------------------------------
+r10 | fbudin | 2014-08-18 10:04:30 -0400 (Mon, 18 Aug 2014) | 5 lines
+
+ENH: Saving the default range is now an advanced option in the Slicer GUI. This allows the user not to be confused by this option that is just to save an example file. This is also because this option is currently not convenient to use from within Slicer because of [1]
+
+[1] http://na-mic.org/Mantis/view.php?id=3805
+
+
+------------------------------------------------------------------------
+r9 | fbudin | 2014-08-14 18:01:26 -0400 (Thu, 14 Aug 2014) | 3 lines
+
+ENH: Addition of tests
+
+
+------------------------------------------------------------------------
+r8 | fbudin | 2014-08-13 17:00:40 -0400 (Wed, 13 Aug 2014) | 3 lines
+
+ENH: Compresses output image
+
+
+------------------------------------------------------------------------
+r7 | fbudin | 2014-08-12 13:43:25 -0400 (Tue, 12 Aug 2014) | 3 lines
+
+ENH: Better detection of problems in range file and exit with error if user gives both arguments to save the default range and to process an image.
+
+
+------------------------------------------------------------------------
+r6 | fbudin | 2014-08-08 11:06:16 -0400 (Fri, 08 Aug 2014) | 13 lines
+
+ENH: IntensitySegmenter has been modified to be integrated as a 3DSlicer extension
+
+-Using SlicerExecutionModel instead of GenerateCLP
+-Possibility to use a default range if no range is specified
+-Option to save default range as a range example file instead of running the filter
+-Addition of flags for input and output files. This allows to not specify those inputs if the user just want to save the range example file
+-Addition of a test if reading range file fails
+-Separation of the program into different functions
+-Using long instead of int to avoid limitations
+-Using std::numeric_limits< long >::max() for maximum possible value instead of arbitrary 100000000
+-Verification that for each label loaded in the range file, the left range is less than the right range
+
+
+------------------------------------------------------------------------
+r5 | bpaniagua | 2012-11-08 08:47:30 -0500 (Thu, 08 Nov 2012) | 1 line
+
+ENH: Improving GenerateCLP tagging for usage in Slicer4
+------------------------------------------------------------------------
+r4 | bpaniagua | 2012-11-07 10:56:30 -0500 (Wed, 07 Nov 2012) | 1 line
+
+ENH: Correction of GenerateCLP tags
+------------------------------------------------------------------------
+r3 | pdxiao | 2012-08-06 16:16:56 -0400 (Mon, 06 Aug 2012) | 5 lines
+
+Version 2 of Intensity Segmenter:
+Add the selection of range file.
+
+
+
+------------------------------------------------------------------------
+r2 | pdxiao | 2012-08-06 16:16:04 -0400 (Mon, 06 Aug 2012) | 5 lines
+
+Version 2 of Intensity Segmenter:
+Add the selection of range file.
+
+
+
+------------------------------------------------------------------------
+r1 | pdxiao | 2012-07-30 11:27:28 -0400 (Mon, 30 Jul 2012) | 3 lines
+
+Pengdong Xiao commits all the files for DentalTools superbuild.
+
+
+------------------------------------------------------------------------

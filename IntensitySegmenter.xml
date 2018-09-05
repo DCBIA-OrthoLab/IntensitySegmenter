@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+<title>Intensity Segmenter</title>
+<description>IntensitySegmenter is a tool that segments an image according to intensity value.</description>
+<category>Segmentation</category>
+<version>1.0</version>
+<contributor>Pengdong Xiao, Beatriz Paniagua from Department of Orthodontics, the University of North Carolina at Chapel Hill, Francois Budin (UNC)</contributor>
+<acknowledgements>This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant NIDCR R01 DE 005215.</acknowledgements>
+  <parameters>
+    <label>I/O</label>
+    
+    <image>
+      <name>inFile</name>
+      <description>Input Image</description>
+      <label>Input Image</label>
+      <channel>input</channel>
+      <longflag>inputFile</longflag>
+      <flag>i</flag>
+    </image>
+
+    <image type="label">
+      <name>outFile</name>
+      <description>Output Label Image</description>
+      <label>Output Label Image</label>
+      <channel>output</channel>
+      <flag>o</flag>
+      <longflag>outputFile</longflag>
+    </image>
+
+    <file fileExtensions=".txt">
+      <name>rangeFile</name>
+      <description>Range file name</description>
+      <label>Range File</label>
+      <channel>input</channel>
+      <longflag>rangeFile</longflag>
+      <flag>r</flag>
+    </file>
+  </parameters>
+  <parameters advanced="true">
+    <label>Advanced</label>
+    <file fileExtensions=".txt">
+      <name>defaultRangeFile</name>
+      <description>Save example range file containing 8 labels: air, lungs, soft tissue, fat, water, CSF, blood and muscle, cancellous bone, dense bone. More information about threshold can be found here: http://en.wikipedia.org/wiki/Hounsfield_scale</description>
+      <label>Save example range File</label>
+      <channel>output</channel>
+      <longflag>saveDefaultRangeFile</longflag>
+      <flag>s</flag>
+    </file>
+    <integer>
+      <name>defaultLabelValue</name>
+      <description>Sets the label value of voxels for which no value is specified in the range file</description>
+      <label>Default Label Value</label>
+      <longflag>defaultLabelValue</longflag>
+      <flag>d</flag>
+      <default>0</default>
+    </integer>
+  </parameters>
+</executable>
