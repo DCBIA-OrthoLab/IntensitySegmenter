@@ -1,3 +1,4 @@
+include(ExternalData)
 
 set(CLP IntensitySegmenter )
 
