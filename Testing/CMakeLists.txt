@@ -10,7 +10,7 @@ set_target_properties(${CLP}Test PROPERTIES LABELS ${CLP})
 # Add standard remote object stores to user's
 # configuration.
 list(APPEND ExternalData_URL_TEMPLATES
-  "http://slicer.kitware.com/midas3/api/rest?method=midas.bitstream.download&checksum=%(hash)"
+  "https://github.com/Slicer/SlicerTestingData/releases/download/MD5/%(hash)"
   )
 
 Add_Test(  NAME ${CLP}TestHelp
@@ -83,6 +83,52 @@ ExternalData_Add_Test( ${CLP}Data
   COMMAND $<TARGET_FILE:${CLP}> -i DATA{Data/Greyscale_presurg.gipl.gz}
   )
 set_tests_properties(${CLP}TestNoOutput PROPERTIES WILL_FAIL true)
+#############################################################
+
+
+############ Errors must be reported, never silently ignored #############
+# Each of these used to end with "success" (exit code 0, default label on every voxel) or with an abort.
+Add_Test( NAME ${CLP}TestRangeFileNotFound
+          COMMAND $<TARGET_FILE:${CLP}> -i ${CMAKE_CURRENT_BINARY_DIR}/none.nrrd -o ${CMAKE_CURRENT_BINARY_DIR}/none-out.nrrd
+                  -r ${CMAKE_CURRENT_BINARY_DIR}/does-not-exist.txt
+        )
+set_tests_properties(${CLP}TestRangeFileNotFound PROPERTIES PASS_REGULAR_EXPRESSION "cannot open the file")
+
+Add_Test( NAME ${CLP}TestEmptyRangeFile
+          COMMAND $<TARGET_FILE:${CLP}> -i ${CMAKE_CURRENT_BINARY_DIR}/none.nrrd -o ${CMAKE_CURRENT_BINARY_DIR}/none-out.nrrd
+                  -r ${CMAKE_CURRENT_SOURCE_DIR}/Data/EmptyRange.txt
+        )
+set_tests_properties(${CLP}TestEmptyRangeFile PROPERTIES PASS_REGULAR_EXPRESSION "contains no range")
+
+Add_Test( NAME ${CLP}TestNonNumericRange
+          COMMAND $<TARGET_FILE:${CLP}> -i ${CMAKE_CURRENT_BINARY_DIR}/none.nrrd -o ${CMAKE_CURRENT_BINARY_DIR}/none-out.nrrd
+                  -r ${CMAKE_CURRENT_SOURCE_DIR}/Data/NonNumericRange.txt
+        )
+set_tests_properties(${CLP}TestNonNumericRange PROPERTIES PASS_REGULAR_EXPRESSION "is not a number")
+
+Add_Test( NAME ${CLP}TestInputImageNotFound
+          COMMAND $<TARGET_FILE:${CLP}> -i ${CMAKE_CURRENT_BINARY_DIR}/does-not-exist.nrrd -o ${CMAKE_CURRENT_BINARY_DIR}/none-out.nrrd
+        )
+set_tests_properties(${CLP}TestInputImageNotFound PROPERTIES PASS_REGULAR_EXPRESSION "Cannot read the input image")
+
+Add_Test( NAME ${CLP}TestDefaultRangeFileNotWritable
+          COMMAND $<TARGET_FILE:${CLP}> -s ${CMAKE_CURRENT_BINARY_DIR}/no-such-directory/range.txt
+        )
+set_tests_properties(${CLP}TestDefaultRangeFileNotWritable PROPERTIES PASS_REGULAR_EXPRESSION "Cannot write the range file")
+
+Add_Test( NAME ${CLP}TestDefaultLabelValueOutOfRange
+          COMMAND $<TARGET_FILE:${CLP}> -i ${CMAKE_CURRENT_BINARY_DIR}/none.nrrd -o ${CMAKE_CURRENT_BINARY_DIR}/none-out.nrrd -d 40000
+        )
+set_tests_properties(${CLP}TestDefaultLabelValueOutOfRange PROPERTIES PASS_REGULAR_EXPRESSION "default label value must be between")
+
+# Blank lines in a range file are ignored (the run must succeed)
+set( ${CLP}BlankLinesOutputVolume ${CMAKE_CURRENT_BINARY_DIR}/TestBlankLinesOutputVolume.nrrd )
+ExternalData_Add_Test( ${CLP}Data
+  NAME ${CLP}TestRangeFileWithBlankLines
+  COMMAND $<TARGET_FILE:${CLP}> -i DATA{Data/Greyscale_presurg.gipl.gz}
+  -o ${${CLP}BlankLinesOutputVolume}
+  -r ${CMAKE_CURRENT_SOURCE_DIR}/Data/RangeWithBlankLines.txt
+  )
 #############################################################
 
 

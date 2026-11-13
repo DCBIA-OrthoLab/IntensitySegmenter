@@ -29,7 +29,7 @@
 
     <file fileExtensions=".txt">
       <name>rangeFile</name>
-      <description>Range file name</description>
+      <description>Range file name. Each line contains: left bound, right bound, label. A voxel receives the label of the range for which left &lt; value &lt;= right (the left bound is excluded, the right bound is included); use -infty and +infty for open ranges. Blank lines are ignored.</description>
       <label>Range File</label>
       <channel>input</channel>
       <longflag>rangeFile</longflag>
@@ -40,7 +40,7 @@
     <label>Advanced</label>
     <file fileExtensions=".txt">
       <name>defaultRangeFile</name>
-      <description>Save example range file containing 8 labels: air, lungs, soft tissue, fat, water, CSF, blood and muscle, cancellous bone, dense bone. More information about threshold can be found here: http://en.wikipedia.org/wiki/Hounsfield_scale</description>
+      <description>Save example range file containing 9 labels: air, lungs, soft tissue, fat, water, CSF, blood and muscle, cancellous bone, dense bone. More information about threshold can be found here: http://en.wikipedia.org/wiki/Hounsfield_scale</description>
       <label>Save example range File</label>
       <channel>output</channel>
       <longflag>saveDefaultRangeFile</longflag>
