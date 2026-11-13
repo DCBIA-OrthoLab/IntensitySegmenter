@@ -1,16 +1,18 @@
-cmake_minimum_required(VERSION 2.8.10)
+cmake_minimum_required(VERSION 3.16.3...3.31)
 
 project(IntensitySegmenter)
 
 if( IntensitySegmenter_BUILD_SLICER_EXTENSION )
   #-----------------------------------------------------------------------------
   # Extension meta-information
-  set(EXTENSION_HOMEPAGE "http://www.nitrc.org/projects/dentaltools")
+  set(EXTENSION_HOMEPAGE "https://www.nitrc.org/projects/dentaltools")
   set(EXTENSION_CATEGORY "Segmentation")
   set(EXTENSION_CONTRIBUTORS "Francois Budin (UNC), Beatriz Paniagua (UNC), Pengdong Xiao (UNC)")
-  set(EXTENSION_DESCRIPTION "This is an example of a simple extension")
-  set(EXTENSION_ICONURL "http://wiki.slicer.org/slicerWiki/images/f/f6/IntensitySegmenterIcon.png")
-  set(EXTENSION_SCREENSHOTURLS "http://wiki.slicer.org/slicerWiki/images/7/7c/IntensitySegmenter-OutputScreenshot.png")
+  set(EXTENSION_DESCRIPTION "Segments an image according to the intensity value of its voxels (for example Hounsfield units), using default or user-defined intensity ranges.")
+  # The icon and the screenshot that were hosted on wiki.slicer.org no longer exist. To restore them, add the
+  # images to this repository and reference them through raw.githubusercontent.com:
+  # set(EXTENSION_ICONURL "https://raw.githubusercontent.com/DCBIA-OrthoLab/IntensitySegmenter/release/IntensitySegmenter.png")
+  # set(EXTENSION_SCREENSHOTURLS "https://raw.githubusercontent.com/DCBIA-OrthoLab/IntensitySegmenter/release/IntensitySegmenter-screenshot.png")
   #-----------------------------------------------------------------------------
   # Extension dependencies
   find_package( Slicer REQUIRED )
