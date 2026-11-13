@@ -10,7 +10,7 @@ set_target_properties(${CLP}Test PROPERTIES LABELS ${CLP})
 # Add standard remote object stores to user's
 # configuration.
 list(APPEND ExternalData_URL_TEMPLATES
-  "http://slicer.kitware.com/midas3/api/rest?method=midas.bitstream.download&checksum=%(hash)"
+  "https://github.com/Slicer/SlicerTestingData/releases/download/MD5/%(hash)"
   )
 
 Add_Test(  NAME ${CLP}TestHelp
