@@ -11,7 +11,14 @@
 #include <itkImageFileReader.h>
 #include <itkImageFileWriter.h>
 #include <itkImageRegionIterator.h>
+#include <itkMacro.h>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
 #include <limits>
+#include <sstream>
+#include <string>
+#include <vector>
 
 typedef short LabelType;
 typedef float InputType;
@@ -23,11 +30,15 @@ struct rangeLabel
   LabelType label ;
 } ;
 
-void SaveRangeInFile( std::vector< rangeLabel > rangeVector ,
+bool SaveRangeInFile( const std::vector< rangeLabel > &rangeVector ,
                       const char* defaultRangeFile
                     )
 {
   std::ofstream stream_outputfile( defaultRangeFile ) ;
+  if( !stream_outputfile )
+  {
+    return false ; // The file cannot be created
+  }
   for( size_t i = 0 ; i < rangeVector.size() ; i++ )
   {
     std::string range_left_str ;
@@ -57,6 +68,30 @@ void SaveRangeInFile( std::vector< rangeLabel > rangeVector ,
                       << rangeVector[ i ].label << std::endl ;
   }
   stream_outputfile.close() ;
+  return !stream_outputfile.fail() ;
+}
+
+// Parses a whole token as a number: "abc" and "12abc" are rejected
+bool ParseBound( const std::string &token , InputType &value )
+{
+  std::istringstream iss( token ) ;
+  iss >> value ;
+  return !iss.fail() && ( iss >> std::ws ).eof() ;
+}
+
+const char* RangeFileErrorMessage( int status )
+{
+  switch( status )
+  {
+    case -1: return "each line must contain: left bound, right bound, label" ;
+    case 1: return "the right bound must be greater than the left bound" ;
+    case 2: return "ranges must be sorted and must not overlap" ;
+    case 3: return "unexpected extra text at the end of a line" ;
+    case 4: return "cannot open the file" ;
+    case 5: return "the file contains no range" ;
+    case 6: return "a range bound is not a number" ;
+    default: return "unknown error" ;
+  }
 }
 
 int ReadRangeFile( const char* rangeFile ,
@@ -64,6 +99,10 @@ int ReadRangeFile( const char* rangeFile ,
                  )
 {
   std::ifstream stream_rangefile( rangeFile ) ;
+  if( !stream_rangefile )
+  {
+    return 4 ; // The file cannot be opened
+  }
   std::string line ;
   
   while( std::getline( stream_rangefile, line ) )
@@ -72,7 +111,11 @@ int ReadRangeFile( const char* rangeFile ,
     std::string range_left_str ;
     std::string range_right_str ;
     rangeLabel rl ;
-    if( !(iss >> range_left_str >> range_right_str >> rl.label ) )
+    if( !(iss >> range_left_str) )
+    {
+      continue ; // Blank line
+    }
+    if( !(iss >> range_right_str >> rl.label ) )
     {
       return -1 ; // The line does not contain all the information it is suppose to
     }
@@ -80,19 +123,17 @@ int ReadRangeFile( const char* rangeFile ,
     {
       rl.range_left = -std::numeric_limits< InputType >::max() ;
     }
-    else
+    else if( !ParseBound( range_left_str , rl.range_left ) )
     {
-      std::istringstream iss_left( range_left_str ) ;
-      iss_left >> rl.range_left ;
+      return 6 ; // The left bound is not a number
     }
     if( range_right_str == "+infty" )
     {
       rl.range_right = std::numeric_limits< InputType >::max() ;
     }
-    else
+    else if( !ParseBound( range_right_str , rl.range_right ) )
     {
-      std::istringstream iss_right( range_right_str ) ;
-      iss_right >> rl.range_right ;
+      return 6 ; // The right bound is not a number
     }
     if( rl.range_left >= rl.range_right )
     {
@@ -112,6 +153,10 @@ int ReadRangeFile( const char* rangeFile ,
     rangeVector.push_back( rl ) ;
   }
   stream_rangefile.close() ;
+  if( rangeVector.empty() )
+  {
+    return 5 ; // Nothing was read: every voxel would silently get the default label
+  }
   return 0 ;
 }
 
@@ -170,6 +215,14 @@ void SetDefaultLabels( std::vector< rangeLabel > &rangeVector )
 int main(int argc, char *argv[])
 {
   PARSE_ARGS ;
+  if( defaultLabelValue < std::numeric_limits< LabelType >::min()
+      || defaultLabelValue > std::numeric_limits< LabelType >::max() )
+  {
+    // The label image stores 16-bit labels: a larger value would wrap around silently
+    std::cerr << "The default label value must be between " << std::numeric_limits< LabelType >::min()
+              << " and " << std::numeric_limits< LabelType >::max() << std::endl ;
+    return EXIT_FAILURE ;
+  }
   std::vector< rangeLabel > rangeVector ;
   if( !defaultRangeFile.empty() )
   {
@@ -180,7 +233,11 @@ int main(int argc, char *argv[])
     }
     SetDefaultLabels( rangeVector ) ;
     std::cout << "Saving example range file and exiting" << std::endl ;
-    SaveRangeInFile( rangeVector , defaultRangeFile.c_str() ) ;
+    if( !SaveRangeInFile( rangeVector , defaultRangeFile.c_str() ) )
+    {
+      std::cerr << "Cannot write the range file \"" << defaultRangeFile << "\"" << std::endl ;
+      return EXIT_FAILURE ;
+    }
     return EXIT_SUCCESS ;
   }
   else if( inFile.empty() || outFile.empty() )
@@ -196,9 +253,11 @@ int main(int argc, char *argv[])
   else
   {
     // Construct intensity range
-    if( ReadRangeFile( rangeFile.c_str() , rangeVector ) )
+    int status = ReadRangeFile( rangeFile.c_str() , rangeVector ) ;
+    if( status )
     {
-      std::cerr << "Error in range file" << std::endl ;
+      std::cerr << "Error in range file \"" << rangeFile << "\": "
+                << RangeFileErrorMessage( status ) << std::endl ;
       return EXIT_FAILURE ;
     }
   }
@@ -207,7 +266,15 @@ int main(int argc, char *argv[])
   typedef itk::ImageFileReader< InputImageType > ReaderType ;
   ReaderType::Pointer reader = ReaderType::New() ;
   reader->SetFileName( inFile.c_str() ) ;
-  reader->Update() ;
+  try
+  {
+    reader->Update() ;
+  }
+  catch( itk::ExceptionObject &excp )
+  {
+    std::cerr << "Cannot read the input image \"" << inFile << "\": " << excp.GetDescription() << std::endl ;
+    return EXIT_FAILURE ;
+  }
   InputImageType::Pointer im = reader->GetOutput() ;
   //Create Label image (output)
   typedef itk::Image< LabelType , 3 > LabelImageType ;
@@ -244,7 +311,15 @@ int main(int argc, char *argv[])
   writer->SetFileName( outFile.c_str() ) ;
   writer->SetInput( labels ) ;
   writer->UseCompressionOn() ;
-  writer->Update() ;
+  try
+  {
+    writer->Update() ;
+  }
+  catch( itk::ExceptionObject &excp )
+  {
+    std::cerr << "Cannot write the output image \"" << outFile << "\": " << excp.GetDescription() << std::endl ;
+    return EXIT_FAILURE ;
+  }
 
   return EXIT_SUCCESS ;
 }
